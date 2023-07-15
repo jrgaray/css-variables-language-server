@@ -40,11 +40,11 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-      # - name: Create a GitHub release
-      #   uses: ncipollo/release-action@v1
-      #   with:
-      #     tag: ${{ steps.package_tag.outputs.newTag}}
-      #     name: Release ${{ steps.package_tag.outputs.newTag }}
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.package_tag.outputs.newTag}}
+          name: Release ${{ steps.package_tag.outputs.newTag }}
       # body: ${{ steps.changelog.outputs.changes }}
 
       - name: Update CHANGELOG
