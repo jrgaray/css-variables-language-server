@@ -32,8 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          skip-tag: "true"
-          tag-prefix: ""
+          tag-prefix: "v"
           minor-wording: "feat,minor"
           major-wording: "MAJOR,cut-major"
           patch-wording:
@@ -45,18 +44,19 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         id: tag_version
         with:
+          dry_run: "true"
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag: ${{ steps.package_tag.outputs.newTag}}
+          name: Release ${{ steps.package_tag.outputs.newTag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.tag_version.outputs.new_tag }}
+          ref: ${{ steps.package_tag.outputs.newTag }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
