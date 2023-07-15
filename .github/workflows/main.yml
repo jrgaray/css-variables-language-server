@@ -40,19 +40,19 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.package_tag.outputs.newTag}}
-          name: Release ${{ steps.package_tag.outputs.newTag }}
-          # body: ${{ steps.changelog.outputs.changes }}
+      # - name: Create a GitHub release
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     tag: ${{ steps.package_tag.outputs.newTag}}
+      #     name: Release ${{ steps.package_tag.outputs.newTag }}
+      # body: ${{ steps.changelog.outputs.changes }}
 
       - name: Update CHANGELOG
         id: changelog
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
+          tag: ${{ steps.package_tag.outputs.newTag }}
 
       # - name: GitHub Tag
       #   uses: mathieudutour/github-tag-action@v6.1
