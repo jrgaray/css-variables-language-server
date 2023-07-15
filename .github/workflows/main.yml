@@ -1,4 +1,4 @@
-name: Bump version
+name: Build, Tag and Deploy to NPM
 on:
   push:
     branches:
@@ -40,6 +40,13 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.package_tag.outputs.newTag}}
+          name: Release ${{ steps.package_tag.outputs.newTag }}
+          # body: ${{ steps.changelog.outputs.changes }}
+
       - name: Update CHANGELOG
         id: changelog
         uses: requarks/changelog-action@v1
@@ -60,7 +67,6 @@ jobs:
           tag: ${{ steps.package_tag.outputs.newTag}}
           name: Release ${{ steps.package_tag.outputs.newTag }}
           body: ${{ steps.changelog.outputs.changes }}
-
       - uses: actions/checkout@v3
         with:
           ref: ${{ steps.package_tag.outputs.newTag }}
