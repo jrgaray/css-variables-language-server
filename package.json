@@ -1,5 +1,5 @@
 {
-  "name": "css-variables-language-server",
+  "name": "cssvar",
   "description": "CSS Variables Language Server in node.",
   "version": "2.6.2",
   "author": "Jose Morris-Garay",
@@ -25,7 +25,6 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "dev": "tsup src/index.ts --format esm,cjs --watch",
     "clean": "rm -rf dist",
     "lint": "eslint ./src --ext .ts,.tsx --fix"
   },
