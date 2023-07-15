@@ -1,7 +1,6 @@
 import {
   createConnection,
   TextDocuments,
-  ProposedFeatures,
   InitializeParams,
   DidChangeConfigurationNotification,
   CompletionItem,
@@ -11,7 +10,7 @@ import {
   InitializeResult,
   ColorInformation,
   FileChangeType,
-  Hover
+  Hover,
 } from "vscode-languageserver/node";
 import * as fs from "fs";
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
@@ -23,13 +22,13 @@ import { getCurrentWord } from "./utils/getCurrentWord";
 import { isInFunctionExpression } from "./utils/isInFunctionExpression";
 import CSSVariableManager, {
   CSSVariablesSettings,
-  defaultSettings
+  defaultSettings,
 } from "./CSSVariableManager";
 
 export const makeConnection = () => {
   // Create a connection for the server, using Node's IPC as a transport.
   // Also include all preview / proposed LSP features.
-  const connection = createConnection(ProposedFeatures.all);
+  const connection = createConnection(process.stdin, process.stdout);
 
   // Create a simple text document manager.
   const documents: TextDocuments<TextDocument> = new TextDocuments(
@@ -64,19 +63,19 @@ export const makeConnection = () => {
         textDocumentSync: TextDocumentSyncKind.Incremental,
         // Tell the client that this server supports code completion.
         completionProvider: {
-          resolveProvider: true
+          resolveProvider: true,
         },
         definitionProvider: true,
         hoverProvider: true,
-        colorProvider: true
-      }
+        colorProvider: true,
+      },
     };
 
     if (hasWorkspaceFolderCapability) {
       result.capabilities.workspace = {
         workspaceFolders: {
-          supported: true
-        }
+          supported: true,
+        },
       };
     }
     return result;
@@ -91,15 +90,15 @@ export const makeConnection = () => {
       );
     }
     if (hasWorkspaceFolderCapability) {
-      connection.workspace.onDidChangeWorkspaceFolders(_event => {
+      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
         connection.console.log("Workspace folder change event received.");
       });
     }
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
-      ?.map(folder => uriToPath(folder.uri) || "")
-      .filter(path => !!path);
+      ?.map((folder) => uriToPath(folder.uri) || "")
+      .filter((path) => !!path);
 
     const settings = await getDocumentSettings();
 
@@ -115,7 +114,7 @@ export const makeConnection = () => {
     Thenable<CSSVariablesSettings>
   > = new Map();
 
-  connection.onDidChangeConfiguration(async change => {
+  connection.onDidChangeConfiguration(async (change) => {
     if (hasConfigurationCapability) {
       // Reset all cached document settings
       documentSettings.clear();
@@ -123,10 +122,10 @@ export const makeConnection = () => {
 
       const validFolders = await connection.workspace
         .getWorkspaceFolders()
-        .then(folders =>
+        .then((folders) =>
           folders
-            ?.map(folder => uriToPath(folder.uri) || "")
-            .filter(path => !!path)
+            ?.map((folder) => uriToPath(folder.uri) || "")
+            .filter((path) => !!path)
         );
 
       const settings = await getDocumentSettings();
@@ -154,14 +153,14 @@ export const makeConnection = () => {
   }
 
   // Only keep settings for open documents
-  documents.onDidClose(e => {
+  documents.onDidClose((e) => {
     connection.console.log("Closed: " + e.document.uri);
     documentSettings.delete(e.document.uri);
   });
 
-  connection.onDidChangeWatchedFiles(_change => {
+  connection.onDidChangeWatchedFiles((_change) => {
     // update cached variables
-    _change.changes.forEach(change => {
+    _change.changes.forEach((change) => {
       const filePath = uriToPath(change.uri);
       if (filePath) {
         // remove variables from cache
@@ -171,7 +170,7 @@ export const makeConnection = () => {
           const content = fs.readFileSync(filePath, "utf8");
           cssVariableManager.parseCSSVariablesFromText({
             content,
-            filePath
+            filePath,
           });
         }
       }
@@ -192,7 +191,7 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      cssVariableManager.getAll().forEach(variable => {
+      cssVariableManager.getAll().forEach((variable) => {
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall
           ? varSymbol.name
@@ -205,7 +204,7 @@ export const makeConnection = () => {
           kind: isColor(varSymbol.value)
             ? CompletionItemKind.Color
             : CompletionItemKind.Variable,
-          sortText: "z"
+          sortText: "z",
         };
 
         if (isFunctionCall) {
@@ -221,11 +220,9 @@ export const makeConnection = () => {
 
   // This handler resolves additional information for the item selected in
   // the completion list.
-  connection.onCompletionResolve(
-    (item: CompletionItem): CompletionItem => {
-      return item;
-    }
-  );
+  connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+    return item;
+  });
 
   connection.onDocumentColor((params): ColorInformation[] => {
     const document = documents.get(params.textDocument.uri);
@@ -240,7 +237,7 @@ export const makeConnection = () => {
 
     const globalStart: Position = { line: 0, character: 0 };
 
-    matches.map(match => {
+    matches.map((match) => {
       const start = indexToPosition(text, match.index + 4);
       const end = indexToPosition(text, match.index + match[0].length);
 
@@ -251,18 +248,18 @@ export const makeConnection = () => {
           start: {
             line: globalStart.line + start.line,
             character:
-              (end.line === 0 ? globalStart.character : 0) + start.character
+              (end.line === 0 ? globalStart.character : 0) + start.character,
           },
           end: {
             line: globalStart.line + end.line,
             character:
-              (end.line === 0 ? globalStart.character : 0) + end.character
-          }
+              (end.line === 0 ? globalStart.character : 0) + end.character,
+          },
         };
 
         colors.push({
           color: cssVariable.color,
-          range
+          range,
         });
       }
     });
@@ -270,7 +267,7 @@ export const makeConnection = () => {
     return colors;
   });
 
-  connection.onHover(params => {
+  connection.onHover((params) => {
     const doc = documents.get(params.textDocument.uri);
 
     if (!doc) {
@@ -289,14 +286,14 @@ export const makeConnection = () => {
     if (cssVariable) {
       return {
         contents: cssVariable.symbol.value,
-        range: cssVariable.definition.range
+        range: cssVariable.definition.range,
       } as Hover;
     }
 
     return null;
   });
 
-  connection.onColorPresentation(params => {
+  connection.onColorPresentation((params) => {
     const document = documents.get(params.textDocument.uri);
 
     const className = document.getText(params.range);
@@ -307,7 +304,7 @@ export const makeConnection = () => {
     return [];
   });
 
-  connection.onDefinition(params => {
+  connection.onDefinition((params) => {
     const doc = documents.get(params.textDocument.uri);
 
     if (!doc) {
