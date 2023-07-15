@@ -40,19 +40,26 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-      - name: GitHub Tag
-        uses: mathieudutour/github-tag-action@v6.1
-        id: tag_version
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
         with:
-          dry_run: "true"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
+
+      # - name: GitHub Tag
+      #   uses: mathieudutour/github-tag-action@v6.1
+      #   id: tag_version
+      #   with:
+      #     dry_run: "true"
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.package_tag.outputs.newTag}}
           name: Release ${{ steps.package_tag.outputs.newTag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: ${{ steps.changelog.outputs.changes }}
 
       - uses: actions/checkout@v3
         with:
