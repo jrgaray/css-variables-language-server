@@ -26,6 +26,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
+
       - name: "Automated Version Bump"
         uses: "phips28/gh-action-bump-version@master"
         id: package_tag
@@ -40,22 +47,12 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          prerelease: true
-          draft: false
-          commit: ${{ github.sha }}
-          tag: ${{ steps.package_tag.outputs.newTag}}
-          name: Release ${{ steps.package_tag.outputs.newTag }}
+      # - name: Create a GitHub release
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     tag: ${{ steps.package_tag.outputs.newTag}}
+      #     name: Release ${{ steps.package_tag.outputs.newTag }}
       # body: ${{ steps.changelog.outputs.changes }}
-
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ steps.package_tag.outputs.newTag }}
 
       # - name: GitHub Tag
       #   uses: mathieudutour/github-tag-action@v6.1
@@ -67,8 +64,6 @@ jobs:
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: true
-          draft: false
           tag: ${{ steps.package_tag.outputs.newTag}}
           name: Release ${{ steps.package_tag.outputs.newTag }}
           body: ${{ steps.changelog.outputs.changes }}
