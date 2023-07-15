@@ -55,7 +55,7 @@ jobs:
       # body: ${{ steps.changelog.outputs.changes }}
       - name: "Build Changelog"
         id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        uses: mikepenz/release-changelog-builder-action@v4
 
       #       - name: GitHub Tag
       #         uses: mathieudutour/github-tag-action@v6.1
