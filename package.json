@@ -1,7 +1,7 @@
 {
   "name": "css-variable-ls",
   "description": "CSS Variables Language Server in node.",
-  "version": "2.6.2",
+  "version": "0.1.0",
   "author": "Jose Morris-Garay",
   "license": "MIT",
   "bin": {
@@ -26,7 +26,9 @@
     "test": "jest",
     "build": "tsc",
     "clean": "rm -rf dist",
-    "lint": "eslint ./src --ext .ts,.tsx --fix"
+    "lint": "eslint ./src --ext .ts,.tsx --fix",
+    "preversion": "npm-run-all clean build",
+    "postversion": "npm publish && git push --follow-tags"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
