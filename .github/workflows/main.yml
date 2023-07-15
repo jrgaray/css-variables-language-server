@@ -35,7 +35,7 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-  publish-github:
+  publish:
     needs: [bump-package, build]
     runs-on: ubuntu-latest
     steps:
