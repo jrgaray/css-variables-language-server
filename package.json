@@ -1,7 +1,7 @@
 {
   "name": "css-variable-ls",
   "description": "CSS Variables Language Server in node.",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "author": "Jose Morris-Garay",
   "license": "MIT",
   "bin": {
