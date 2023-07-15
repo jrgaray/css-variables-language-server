@@ -1,5 +1,5 @@
 {
-  "name": "cssvar",
+  "name": "css-variable-ls",
   "description": "CSS Variables Language Server in node.",
   "version": "2.6.2",
   "author": "Jose Morris-Garay",
