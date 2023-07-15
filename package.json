@@ -26,9 +26,7 @@
     "test": "jest",
     "build": "tsc",
     "clean": "rm -rf dist",
-    "lint": "eslint ./src --ext .ts,.tsx --fix",
-    "preversion": "npm-run-all clean build",
-    "postversion": "npm publish && git push --follow-tags"
+    "lint": "eslint ./src --ext .ts,.tsx --fix"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
