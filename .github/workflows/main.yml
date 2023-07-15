@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag-prefix: "v"
+          tag-prefix: ""
           minor-wording: "feat,minor"
           major-wording: "MAJOR,cut-major"
           patch-wording:
@@ -44,7 +44,6 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         id: tag_version
         with:
-          dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a GitHub release
