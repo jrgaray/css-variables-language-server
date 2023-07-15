@@ -46,13 +46,15 @@ jobs:
         with:
           dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag: ${{ steps.package_tag.outputs.newTag }}
-          name: Release ${{ steps.package_tag.outputs.newTag }}
+          tag_name: ${{ steps.package_tag.outputs.newTag }}
+          release_name: Release ${{ steps.package_tag.outputs.newTag }}
           body: ${{ steps.tag_version.outputs.changelog }}
+          draft: false
+          prerelease: false
 
       - uses: actions/checkout@v3
         with:
