@@ -14,20 +14,25 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  bump-package:
+  publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16
+
       - run: npm ci
+
       - name: "Automated Version Bump"
         uses: "phips28/gh-action-bump-version@master"
+        id: package_tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag-prefix: ""
           minor-wording: "feat,minor"
           major-wording: "MAJOR,cut-major"
           patch-wording:
@@ -35,26 +40,24 @@ jobs:
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
 
-  publish:
-    needs: [bump-package, build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: GitHub Tag
         uses: mathieudutour/github-tag-action@v6.1
         id: tag_version
         with:
+          dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag: ${{ steps.package_tag.outputs.newTag }}
+          name: Release ${{ steps.package_tag.outputs.newTag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.tag_version.outputs.new_tag }}
+          ref: ${{ steps.package_tag.outputs.newTag }}
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16
