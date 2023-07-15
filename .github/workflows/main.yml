@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag-prefix: ""
+          tag-prefix: "v"
           minor-wording: "feat,minor"
           major-wording: "MAJOR,cut-major"
           patch-wording:
@@ -46,20 +46,17 @@ jobs:
         with:
           dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.package_tag.outputs.newTag }}
-          release_name: Release ${{ steps.package_tag.outputs.newTag }}
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-          draft: false
-          prerelease: false
 
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.package_tag.outputs.newTag }}
-
+          ref: ${{ steps.tag_version.outputs.new_tag }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
