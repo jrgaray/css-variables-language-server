@@ -13,25 +13,35 @@ jobs:
           node-version: 16
       - run: npm ci
       - run: npm test
-      
-  publish-github:
+
+  bump-package:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name:  'Automated Version Bump'
-        uses:  'phips28/gh-action-bump-version@master'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - name: "Automated Version Bump"
+        uses: "phips28/gh-action-bump-version@master"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-github:
+    needs: [bump-package, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-          
+
   publish-npm:
-    needs: [publish-github, build]
+    needs: [publish-github, bump-package, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,4 +53,3 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
