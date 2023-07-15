@@ -53,21 +53,24 @@ jobs:
       #     tag: ${{ steps.package_tag.outputs.newTag}}
       #     name: Release ${{ steps.package_tag.outputs.newTag }}
       # body: ${{ steps.changelog.outputs.changes }}
+      - name: "Build Changelog"
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}
 
-      - name: GitHub Tag
-        uses: mathieudutour/github-tag-action@v6.1
-        id: tag_version
-        with:
-          dry_run: "true"
-          commit_sha: github.ref
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      #       - name: GitHub Tag
+      #         uses: mathieudutour/github-tag-action@v6.1
+      #         id: tag_version
+      #         with:
+      #           dry_run: "true"
+      #           commit_sha: github.ref
+      #           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.package_tag.outputs.newTag}}
           name: Release ${{ steps.package_tag.outputs.newTag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
 
       - uses: actions/checkout@v3
         with:
