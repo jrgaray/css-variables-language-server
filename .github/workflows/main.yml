@@ -26,13 +26,6 @@ jobs:
 
       - run: npm ci
 
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
-
       - name: "Automated Version Bump"
         uses: "phips28/gh-action-bump-version@master"
         id: package_tag
@@ -46,6 +39,13 @@ jobs:
             "patch,fix,bug,ci" # Providing patch-wording will override commits
             # defaulting to a patch bump.
           rc-wording: "RELEASE,alpha"
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ steps.package_tag.outputs.newTag }}
 
       # - name: Create a GitHub release
       #   uses: ncipollo/release-action@v1
