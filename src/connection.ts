@@ -105,7 +105,10 @@ export const makeConnection = () => {
 
     logThis("onInitialized", { settings, workspaceFolders, validFolders });
     // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
+    cssVariableManager.parseAndSyncVariables(validFolders || [], {
+      ...globalSettings,
+      ...settings,
+    });
   });
 
   let globalSettings = defaultSettings;
@@ -132,9 +135,11 @@ export const makeConnection = () => {
 
       const settings = await getDocumentSettings();
 
-      logThis("onDidChangeConfiguration", { settings, validFolders });
       // parse and sync variables
-      cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
+      cssVariableManager.parseAndSyncVariables(validFolders || [], {
+        ...globalSettings,
+        ...settings,
+      });
     } else {
       globalSettings = <CSSVariablesSettings>(
         (change.settings?.cssVariables || defaultSettings)
@@ -144,10 +149,8 @@ export const makeConnection = () => {
   });
 
   function logThis(location: string, content: object) {
-    connection.console.info("INFO-----------------------------------");
-    connection.console.info(`location: ${location}`);
+    connection.console.info(`debug logger: ${location}`);
     connection.console.info(JSON.stringify(content));
-    connection.console.info("INFO-----------------------------------");
   }
 
   function getDocumentSettings(): Thenable<CSSVariablesSettings> {
