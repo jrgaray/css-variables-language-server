@@ -100,10 +100,13 @@ export const makeConnection = () => {
       ?.map((folder) => uriToPath(folder.uri) || "")
       .filter((path) => !!path);
 
-    const settings = await getDocumentSettings();
+    // const settings = await getDocumentSettings();
 
     // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
+    cssVariableManager.parseAndSyncVariables(
+      validFolders || [],
+      defaultSettings
+    );
   });
 
   let globalSettings = defaultSettings;
