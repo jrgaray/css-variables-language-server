@@ -81,33 +81,33 @@ export const makeConnection = () => {
     return result;
   });
 
-  connection.onInitialized(async () => {
-    if (hasConfigurationCapability) {
-      // Register for all configuration changes.
-      connection.client.register(
-        DidChangeConfigurationNotification.type,
-        undefined
-      );
-    }
-    if (hasWorkspaceFolderCapability) {
-      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-        connection.console.log("Workspace folder change event received.");
-      });
-    }
+  // connection.onInitialized(async () => {
+  //   if (hasConfigurationCapability) {
+  //     // Register for all configuration changes.
+  //     connection.client.register(
+  //       DidChangeConfigurationNotification.type,
+  //       undefined
+  //     );
+  //   }
+  //   if (hasWorkspaceFolderCapability) {
+  //     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
+  //       connection.console.log("Workspace folder change event received.");
+  //     });
+  //   }
 
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const validFolders = workspaceFolders
-      ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
+  //   const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+  //   const validFolders = workspaceFolders
+  //     ?.map((folder) => uriToPath(folder.uri) || "")
+  //     .filter((path) => !!path);
 
-    // const settings = await getDocumentSettings();
+  //   // const settings = await getDocumentSettings();
 
-    // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(
-      validFolders || [],
-      defaultSettings
-    );
-  });
+  //   // parse and sync variables
+  //   cssVariableManager.parseAndSyncVariables(
+  //     validFolders || [],
+  //     defaultSettings
+  //   );
+  // });
 
   let globalSettings = defaultSettings;
 
@@ -117,71 +117,69 @@ export const makeConnection = () => {
     Thenable<CSSVariablesSettings>
   > = new Map();
 
-  connection.onDidChangeConfiguration(async (change) => {
-    if (hasConfigurationCapability) {
-      // Reset all cached document settings
-      documentSettings.clear();
-      cssVariableManager.clearAllCache();
+  // connection.onDidChangeConfiguration(async (change) => {
+  //   if (hasConfigurationCapability) {
+  //     // Reset all cached document settings
+  //     documentSettings.clear();
+  //     cssVariableManager.clearAllCache();
 
-      const validFolders = await connection.workspace
-        .getWorkspaceFolders()
-        .then((folders) =>
-          folders
-            ?.map((folder) => uriToPath(folder.uri) || "")
-            .filter((path) => !!path)
-        );
+  //     const validFolders = await connection.workspace
+  //       .getWorkspaceFolders()
+  //       .then((folders) =>
+  //         folders
+  //           ?.map((folder) => uriToPath(folder.uri) || "")
+  //           .filter((path) => !!path)
+  //       );
 
-      // const settings = await getDocumentSettings();
+  //     // const settings = await getDocumentSettings();
 
-      // parse and sync variables
-      cssVariableManager.parseAndSyncVariables(
-        validFolders || [],
-        defaultSettings
-      );
-    } else {
-      globalSettings = <CSSVariablesSettings>(
-        (change.settings?.cssVariables || defaultSettings)
-      );
-    }
-  });
+  //     // parse and sync variables
+  //     cssVariableManager.parseAndSyncVariables(
+  //       validFolders || [],
+  //       defaultSettings
+  //     );
+  //   } else {
+  //     globalSettings = <CSSVariablesSettings>defaultSettings;
+  //   }
+  // });
 
-  function getDocumentSettings(): Thenable<CSSVariablesSettings> {
-    const resource = "all";
-    if (!hasConfigurationCapability) {
-      return Promise.resolve(globalSettings);
-    }
-    let result = documentSettings.get(resource);
-    if (!result) {
-      result = connection.workspace.getConfiguration("cssVariables");
-      documentSettings.set(resource, result);
-    }
-    return result;
-  }
+  // function getDocumentSettings(): Thenable<CSSVariablesSettings> {
+  //   const resource = "all";
+  //   if (!hasConfigurationCapability) {
+  //     return Promise.resolve(globalSettings);
+  //   }
+  //   let result = documentSettings.get(resource);
+  //   if (!result) {
+  //     result = connection.workspace.getConfiguration("cssVariables");
+  //     documentSettings.set(resource, result);
+  //   }
+  //   return result;
+  // }
 
   // Only keep settings for open documents
-  documents.onDidClose((e) => {
-    connection.console.log("Closed: " + e.document.uri);
-    documentSettings.delete(e.document.uri);
-  });
+  // documents.onDidClose((e) => {
+  //   connection.console.log("Closed: " + e.document.uri);
+  //   documentSettings.delete(e.document.uri);
+  // });
 
-  connection.onDidChangeWatchedFiles((_change) => {
-    // update cached variables
-    _change.changes.forEach((change) => {
-      const filePath = uriToPath(change.uri);
-      if (filePath) {
-        // remove variables from cache
-        if (change.type === FileChangeType.Deleted) {
-          cssVariableManager.clearFileCache(filePath);
-        } else {
-          const content = fs.readFileSync(filePath, "utf8");
-          cssVariableManager.parseCSSVariablesFromText({
-            content,
-            filePath,
-          });
-        }
-      }
-    });
-  });
+  // connection.onDidChangeWatchedFiles((_change) => {
+  //   // update cached variables
+  //   _change.changes.forEach((change) => {
+  //     const filePath = uriToPath(change.uri);
+  //     if (filePath) {
+  //       // remove variables from cache
+  //       if (change.type === FileChangeType.Deleted) {
+  //         cssVariableManager.clearFileCache(filePath);
+  //       } else {
+  //         const content = fs.readFileSync(filePath, "utf8");
+  //         cssVariableManager.parseCSSVariablesFromText({
+  //           content,
+  //           filePath,
+  //         });
+  //       }
+  //     }
+  //   });
+  // });
 
   // This handler provides the initial list of the completion items.
   connection.onCompletion(
