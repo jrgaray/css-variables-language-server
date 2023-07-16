@@ -103,6 +103,7 @@ export const makeConnection = () => {
 
     const settings = await getDocumentSettings();
 
+    logThis("onInitialized", { settings, workspaceFolders, validFolders });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
   });
@@ -131,14 +132,23 @@ export const makeConnection = () => {
 
       const settings = await getDocumentSettings();
 
+      logThis("onDidChangeConfiguration", { settings, validFolders });
       // parse and sync variables
       cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
     } else {
       globalSettings = <CSSVariablesSettings>(
         (change.settings?.cssVariables || defaultSettings)
       );
+      logThis("onDidChangeConfiguration", { globalSettings });
     }
   });
+
+  function logThis(location: string, content: object) {
+    connection.console.info("INFO-----------------------------------");
+    connection.console.info(`location: ${location}`);
+    connection.console.info(JSON.stringify(content));
+    connection.console.info("INFO-----------------------------------");
+  }
 
   function getDocumentSettings(): Thenable<CSSVariablesSettings> {
     const resource = "all";
@@ -150,6 +160,7 @@ export const makeConnection = () => {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
     }
+    logThis("getDocumentSettings", { result, hasConfigurationCapability });
     return result;
   }
 
@@ -159,9 +170,10 @@ export const makeConnection = () => {
     documentSettings.delete(e.document.uri);
   });
 
-  connection.onDidChangeWatchedFiles((_change) => {
+  connection.onDidChangeWatchedFiles(({ changes }) => {
+    logThis("onDidChangeWatchedFiles", { changes });
     // update cached variables
-    _change.changes.forEach((change) => {
+    changes.forEach((change) => {
       const filePath = uriToPath(change.uri);
       if (filePath) {
         // remove variables from cache
