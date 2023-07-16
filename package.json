@@ -27,7 +27,7 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "lint": "eslint ./src --ext .ts,.tsx --fix",
-    "preversion": "npm-run-all clean build"
+    "prepare": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
