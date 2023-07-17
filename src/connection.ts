@@ -42,6 +42,9 @@ export const makeConnection = () => {
 
   const cssVariableManager = new CSSVariableManager();
 
+  connection.onDidOpenTextDocument((doc) => {
+    connection.console.log(JSON.stringify({ asdf: doc.textDocument.uri }));
+  });
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities;
 
