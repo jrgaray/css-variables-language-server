@@ -45,6 +45,7 @@ export const makeConnection = () => {
   connection.onDidOpenTextDocument((doc) => {
     connection.console.log(JSON.stringify({ asdf: doc.textDocument.uri }));
   });
+
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities;
 
@@ -94,8 +95,21 @@ export const makeConnection = () => {
       );
     }
     if (hasWorkspaceFolderCapability) {
-      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-        connection.console.log("Workspace folder change event received.");
+      connection.workspace.onDidChangeWorkspaceFolders(async (_event) => {
+        const workspaceFolders =
+          await connection.workspace.getWorkspaceFolders();
+        const validFolders = workspaceFolders
+          ?.map((folder) => uriToPath(folder.uri) || "")
+          .filter((path) => !!path);
+
+        const settings = await getDocumentSettings();
+
+        logThis("onInitialized", { settings, workspaceFolders, validFolders });
+        // parse and sync variables
+        cssVariableManager.parseAndSyncVariables(validFolders || [], {
+          ...globalSettings,
+          ...settings,
+        });
       });
     }
 
