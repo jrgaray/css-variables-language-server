@@ -234,7 +234,6 @@ export const makeConnection = () => {
           kind: isColor(varSymbol.value)
             ? CompletionItemKind.Color
             : CompletionItemKind.Variable,
-          sortText: "z",
         };
 
         if (isFunctionCall) {
