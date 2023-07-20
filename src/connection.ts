@@ -104,7 +104,7 @@ export const makeConnection = () => {
 
         const settings = await getDocumentSettings();
 
-        logThis("onInitialized", { settings, workspaceFolders, validFolders });
+        logger("onInitialized", { settings, workspaceFolders, validFolders });
         // parse and sync variables
         cssVariableManager.parseAndSyncVariables(validFolders || [], {
           ...globalSettings,
@@ -120,7 +120,7 @@ export const makeConnection = () => {
 
     const settings = await getDocumentSettings();
 
-    logThis("onInitialized", { settings, workspaceFolders, validFolders });
+    logger("onInitialized", { settings, workspaceFolders, validFolders });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(validFolders || [], {
       ...globalSettings,
@@ -161,12 +161,12 @@ export const makeConnection = () => {
       globalSettings = <CSSVariablesSettings>(
         (change.settings?.cssVariables || defaultSettings)
       );
-      logThis("onDidChangeConfiguration", { globalSettings });
+      logger("onDidChangeConfiguration", { globalSettings });
     }
   });
 
-  function logThis(location: string, content: object) {
-    connection.console.info(`debug logger: ${location}`);
+  function logger(location: string, content: object) {
+    connection.console.info(`logger: ${location}`);
     connection.console.info(JSON.stringify(content));
   }
 
@@ -180,7 +180,7 @@ export const makeConnection = () => {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
     }
-    logThis("getDocumentSettings", { result, hasConfigurationCapability });
+    logger("getDocumentSettings", { result, hasConfigurationCapability });
     return result;
   }
 
@@ -191,7 +191,7 @@ export const makeConnection = () => {
   });
 
   connection.onDidChangeWatchedFiles(({ changes }) => {
-    logThis("onDidChangeWatchedFiles", { changes });
+    logger("onDidChangeWatchedFiles", { changes });
     // update cached variables
     changes.forEach((change) => {
       const filePath = uriToPath(change.uri);
@@ -224,7 +224,9 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      cssVariableManager.getAll().forEach((variable) => {
+      const variableOptions = cssVariableManager.getAll();
+      logger("onCompletion", { variableOptions, currentWord });
+      variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall
           ? varSymbol.name
@@ -310,11 +312,13 @@ export const makeConnection = () => {
     const offset = doc.offsetAt(params.position);
     const currentWord = getCurrentWord(doc, offset);
 
+    logger("onHover", { offset, currentWord });
     if (!currentWord) return null;
 
     const nornalizedWord = currentWord.slice(1);
 
     const cssVariable = cssVariableManager.getAll().get(nornalizedWord);
+    logger("onHover", { nornalizedWord, cssVariable });
 
     if (cssVariable) {
       return {
