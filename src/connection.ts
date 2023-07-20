@@ -11,7 +11,6 @@ import {
   ColorInformation,
   FileChangeType,
   Hover,
-  ProposedFeatures,
 } from "vscode-languageserver/node";
 import * as fs from "fs";
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
@@ -29,7 +28,7 @@ import CSSVariableManager, {
 export const makeConnection = () => {
   // Create a connection for the server, using Node's IPC as a transport.
   // Also include all preview / proposed LSP features.
-  const connection = createConnection(ProposedFeatures.all);
+  const connection = createConnection(process.stdin, process.stdout);
 
   // Create a simple text document manager.
   const documents: TextDocuments<TextDocument> = new TextDocuments(
@@ -41,10 +40,6 @@ export const makeConnection = () => {
   let hasDiagnosticRelatedInformationCapability = false;
 
   const cssVariableManager = new CSSVariableManager();
-
-  connection.onDidOpenTextDocument((doc) => {
-    connection.console.log(JSON.stringify({ asdf: doc.textDocument.uri }));
-  });
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities;
@@ -180,7 +175,6 @@ export const makeConnection = () => {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
     }
-    logger("getDocumentSettings", { result, hasConfigurationCapability });
     return result;
   }
 
@@ -227,6 +221,7 @@ export const makeConnection = () => {
       const variableOptions = cssVariableManager.getAll();
       logger("onCompletion", { variableOptions, currentWord });
       variableOptions.forEach((variable) => {
+        logger("onCompletion", variable);
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall
           ? varSymbol.name
