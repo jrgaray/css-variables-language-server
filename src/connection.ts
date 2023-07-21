@@ -68,20 +68,35 @@ export const makeConnection = () => {
         definitionProvider: true,
         hoverProvider: true,
         colorProvider: true,
-        workspace: {
-          workspaceFolders: {supported: true}
-        }
       },
     };
 
-    // if (hasWorkspaceFolderCapability) {
-    //   result.capabilities.workspace = {
-    //     workspaceFolders: {
-    //       supported: true,
-    //     },
-    //   };
-    // }
+    if (hasWorkspaceFolderCapability) {
+      result.capabilities.workspace = {
+        workspaceFolders: {
+          supported: true,
+        },
+      };
+    }
     return result;
+  });
+
+  connection.workspace.onDidChangeWorkspaceFolders(async (_event) => {
+    documentSettings.clear();
+    cssVariableManager.clearAllCache();
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const validFolders = workspaceFolders
+      ?.map((folder) => uriToPath(folder.uri) || "")
+      .filter((path) => !!path);
+
+    const settings = await getDocumentSettings();
+
+    logger("onInitialized", { settings, workspaceFolders, validFolders });
+    // parse and sync variables
+    cssVariableManager.parseAndSyncVariables(validFolders || [], {
+      ...globalSettings,
+      ...settings,
+    });
   });
 
   connection.onInitialized(async () => {
@@ -91,26 +106,6 @@ export const makeConnection = () => {
         DidChangeConfigurationNotification.type,
         undefined
       );
-    }
-    if (hasWorkspaceFolderCapability) {
-      connection.workspace.onDidChangeWorkspaceFolders(async (_event) => {
-        documentSettings.clear()
-        cssVariableManager.clearAllCache()
-        const workspaceFolders =
-          await connection.workspace.getWorkspaceFolders();
-        const validFolders = workspaceFolders
-          ?.map((folder) => uriToPath(folder.uri) || "")
-          .filter((path) => !!path);
-
-        const settings = await getDocumentSettings();
-
-        logger("onInitialized", { settings, workspaceFolders, validFolders });
-        // parse and sync variables
-        cssVariableManager.parseAndSyncVariables(validFolders || [], {
-          ...globalSettings,
-          ...settings,
-        });
-      });
     }
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
