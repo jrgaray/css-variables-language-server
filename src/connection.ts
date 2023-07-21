@@ -68,16 +68,19 @@ export const makeConnection = () => {
         definitionProvider: true,
         hoverProvider: true,
         colorProvider: true,
+        workspace: {
+          workspaceFolders: {supported: true}
+        }
       },
     };
 
-    if (hasWorkspaceFolderCapability) {
-      result.capabilities.workspace = {
-        workspaceFolders: {
-          supported: true,
-        },
-      };
-    }
+    // if (hasWorkspaceFolderCapability) {
+    //   result.capabilities.workspace = {
+    //     workspaceFolders: {
+    //       supported: true,
+    //     },
+    //   };
+    // }
     return result;
   });
 
