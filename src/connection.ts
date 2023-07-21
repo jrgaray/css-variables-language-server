@@ -91,6 +91,8 @@ export const makeConnection = () => {
     }
     if (hasWorkspaceFolderCapability) {
       connection.workspace.onDidChangeWorkspaceFolders(async (_event) => {
+        documentSettings.clear()
+        cssVariableManager.clearAllCache()
         const workspaceFolders =
           await connection.workspace.getWorkspaceFolders();
         const validFolders = workspaceFolders
