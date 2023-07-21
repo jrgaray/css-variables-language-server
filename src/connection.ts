@@ -159,6 +159,15 @@ export const makeConnection = () => {
     connection.console.info(JSON.stringify(content));
   }
 
+  connection.onDidOpenTextDocument((event) => {
+    connection.console.info("onDidOpenTextDocument");
+    connection.console.info(event.textDocument.uri);
+  });
+  connection.onDidCloseTextDocument((event) => {
+    connection.console.info("onDidCloseTextDocument");
+    connection.console.info(event.textDocument.uri);
+  });
+
   function getDocumentSettings(): Thenable<CSSVariablesSettings> {
     const resource = "all";
     if (!hasConfigurationCapability) {
