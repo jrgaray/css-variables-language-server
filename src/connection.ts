@@ -107,6 +107,29 @@ export const makeConnection = () => {
         undefined
       );
     }
+    if (hasConfigurationCapability) {
+      connection.onDidChangeConfiguration(async (change) => {
+        // Reset all cached document settings
+        documentSettings.clear();
+        cssVariableManager.clearAllCache();
+
+        const validFolders = await connection.workspace
+          .getWorkspaceFolders()
+          .then((folders) =>
+            folders
+              ?.map((folder) => uriToPath(folder.uri) || "")
+              .filter((path) => !!path)
+          );
+
+        const settings = await getDocumentSettings();
+
+        // parse and sync variables
+        cssVariableManager.parseAndSyncVariables(validFolders || [], {
+          ...globalSettings,
+          ...settings,
+        });
+      });
+    }
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
@@ -130,35 +153,6 @@ export const makeConnection = () => {
     string,
     Thenable<CSSVariablesSettings>
   > = new Map();
-
-  connection.onDidChangeConfiguration(async (change) => {
-    if (hasConfigurationCapability) {
-      // Reset all cached document settings
-      documentSettings.clear();
-      cssVariableManager.clearAllCache();
-
-      const validFolders = await connection.workspace
-        .getWorkspaceFolders()
-        .then((folders) =>
-          folders
-            ?.map((folder) => uriToPath(folder.uri) || "")
-            .filter((path) => !!path)
-        );
-
-      const settings = await getDocumentSettings();
-
-      // parse and sync variables
-      cssVariableManager.parseAndSyncVariables(validFolders || [], {
-        ...globalSettings,
-        ...settings,
-      });
-    } else {
-      globalSettings = <CSSVariablesSettings>(
-        (change.settings?.cssVariables || defaultSettings)
-      );
-      logger("onDidChangeConfiguration", { globalSettings });
-    }
-  });
 
   function logger(location: string, content: object) {
     connection.console.info(`logger: ${location}`);
