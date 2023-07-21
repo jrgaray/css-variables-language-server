@@ -81,24 +81,6 @@ export const makeConnection = () => {
     return result;
   });
 
-  connection.workspace.onDidChangeWorkspaceFolders(async (_event) => {
-    documentSettings.clear();
-    cssVariableManager.clearAllCache();
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const validFolders = workspaceFolders
-      ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
-
-    const settings = await getDocumentSettings();
-
-    logger("onInitialized", { settings, workspaceFolders, validFolders });
-    // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...globalSettings,
-      ...settings,
-    });
-  });
-
   connection.onInitialized(async () => {
     if (hasConfigurationCapability) {
       // Register for all configuration changes.
