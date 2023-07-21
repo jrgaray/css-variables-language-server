@@ -349,6 +349,15 @@ export const makeConnection = () => {
 
     const nornalizedWord = currentWord.slice(1);
     const cssVariable = cssVariableManager.getAll().get(nornalizedWord);
+    const allObject = [...cssVariableManager.getAll().entries()].reduce(
+      (acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      },
+      {}
+    );
+
+    connection.console.log(JSON.stringify(allObject));
 
     if (cssVariable) {
       return cssVariable.definition;
