@@ -89,29 +89,30 @@ export const makeConnection = () => {
         undefined
       );
     }
-    if (hasConfigurationCapability) {
-      connection.onDidChangeConfiguration(async (change) => {
-        // Reset all cached document settings
-        documentSettings.clear();
-        cssVariableManager.clearAllCache();
+    // if (hasConfigurationCapability) {
+    //   connection.onDidChangeConfiguration(async (change) => {
+    //     // Reset all cached document settings
+    //     documentSettings.clear();
+    //     cssVariableManager.clearAllCache();
 
-        const validFolders = await connection.workspace
-          .getWorkspaceFolders()
-          .then((folders) =>
-            folders
-              ?.map((folder) => uriToPath(folder.uri) || "")
-              .filter((path) => !!path)
-          );
+    //     const validFolders = await connection.workspace
+    //       .getWorkspaceFolders()
+    //       .then((folders) =>
+    //         folders
+    //           ?.map((folder) => uriToPath(folder.uri) || "")
+    //           .filter((path) => !!path)
+    //       );
 
-        const settings = await getDocumentSettings();
+    //     const settings = await getDocumentSettings();
 
-        // parse and sync variables
-        cssVariableManager.parseAndSyncVariables(validFolders || [], {
-          ...globalSettings,
-          ...settings,
-        });
-      });
-    }
+    //     // parse and sync variables
+    //     cssVariableManager.parseAndSyncVariables(validFolders || [], {
+    //       ...globalSettings,
+    //       ...settings,
+    //     });
+    //   });
+    //   return;
+    // }
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
@@ -156,12 +157,18 @@ export const makeConnection = () => {
       return Promise.resolve(globalSettings);
     }
     let result = documentSettings.get(resource);
+    result.then((res) =>
+      connection.console.info(`asdf: ${res.lookupFiles.join(", ")}`)
+    );
     if (!result) {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
     }
     return result;
   }
+  documents.onDidOpen((e) => {
+    connection.console.info(`onDocumentDidOpen ${e.document.uri}`);
+  });
 
   // Only keep settings for open documents
   documents.onDidClose((e) => {
@@ -281,12 +288,27 @@ export const makeConnection = () => {
     return colors;
   });
 
-  connection.onHover((params) => {
+  connection.onHover(async (params) => {
     const doc = documents.get(params.textDocument.uri);
 
     if (!doc) {
       return null;
     }
+    documentSettings.clear();
+    cssVariableManager.clearAllCache();
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const validFolders = workspaceFolders
+      ?.map((folder) => uriToPath(folder.uri) || "")
+      .filter((path) => !!path);
+
+    const settings = await getDocumentSettings();
+
+    logger("onInitialized", { settings, workspaceFolders, validFolders });
+    // parse and sync variables
+    cssVariableManager.parseAndSyncVariables(validFolders || [], {
+      ...globalSettings,
+      ...settings,
+    });
 
     const offset = doc.offsetAt(params.position);
     const currentWord = getCurrentWord(doc, offset);
