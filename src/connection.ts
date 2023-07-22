@@ -80,10 +80,6 @@ export const makeConnection = () => {
     }
     return result;
   });
-  connection.workspace.onDidChangeWorkspaceFolders((e) => {
-    connection.console.info("fast");
-    connection.console.info(e.added.toString());
-  });
 
   connection.onInitialized(async () => {
     if (hasConfigurationCapability) {
@@ -95,7 +91,7 @@ export const makeConnection = () => {
     }
     if (hasWorkspaceFolderCapability) {
       connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-        connection.console.log("Workspace folder change event received.");
+        connection.console.info("Workspace folder change event received.");
       });
     }
 
@@ -147,9 +143,6 @@ export const makeConnection = () => {
   documents.onDidOpen(async ({ document }) => {
     documentSettings.clear();
     cssVariableManager.clearAllCache();
-    const map = new Map();
-    map.clear();
-    const variables = cssVariableManager.getAll().entries;
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
       ?.map((folder) => uriToPath(folder.uri) || "")
