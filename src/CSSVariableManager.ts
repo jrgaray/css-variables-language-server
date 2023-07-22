@@ -75,8 +75,6 @@ export default class CSSVariableManager {
   }) => {
     try {
       // reset cache for this file
-      this.clearAllCache();
-      // this.cacheManager.clearFileCache(filePath);
 
       const ast = getAST(filePath, content);
       const fileURI = pathToFileURL(filePath).toString();

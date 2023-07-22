@@ -132,7 +132,11 @@ export const makeConnection = () => {
 
     const settings = await getDocumentSettings();
 
-    logger("onInitialized", { settings, workspaceFolders, validFolders });
+    logger("onDidOpenTextDocument", {
+      settings,
+      workspaceFolders,
+      validFolders,
+    });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(validFolders || [], {
       ...globalSettings,
@@ -156,7 +160,9 @@ export const makeConnection = () => {
     }
     return result;
   }
-  documents.onDidOpen(async (_) => { });
+  documents.onDidOpen(async (_) => {
+    logger("onDidOpen", {});
+  });
 
   // Only keep settings for open documents
   documents.onDidClose((e) => {
