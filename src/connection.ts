@@ -80,6 +80,10 @@ export const makeConnection = () => {
     }
     return result;
   });
+  connection.workspace.onDidChangeWorkspaceFolders((e) => {
+    connection.console.info("fast");
+    connection.console.info(e.added.toString());
+  });
 
   connection.onInitialized(async () => {
     if (hasConfigurationCapability) {
@@ -139,9 +143,13 @@ export const makeConnection = () => {
     }
     return result;
   }
-  documents.onDidOpen(async (_) => {
+
+  documents.onDidOpen(async ({ document }) => {
     documentSettings.clear();
     cssVariableManager.clearAllCache();
+    const map = new Map();
+    map.clear();
+    const variables = cssVariableManager.getAll().entries;
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
       ?.map((folder) => uriToPath(folder.uri) || "")
