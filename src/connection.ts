@@ -171,7 +171,10 @@ export const makeConnection = () => {
       const settings = await getDocumentSettings();
 
       // parse and sync variables
-      cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
+      cssVariableManager.parseAndSyncVariables(validFolders || [], {
+        ...globalSettings,
+        ...settings,
+      });
     } else {
       globalSettings = <CSSVariablesSettings>(
         (change.settings?.cssVariables || defaultSettings)
