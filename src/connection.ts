@@ -137,9 +137,6 @@ export const makeConnection = () => {
       return Promise.resolve(globalSettings);
     }
     let result = documentSettings.get(resource);
-    result.then((res) =>
-      connection.console.info(`asdf: ${res.lookupFiles.join(", ")}`)
-    );
     if (!result) {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
