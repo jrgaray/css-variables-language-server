@@ -122,27 +122,6 @@ export const makeConnection = () => {
     connection.console.info(JSON.stringify(content));
   }
 
-  connection.onDidOpenTextDocument(async (event) => {
-    documentSettings.clear();
-    cssVariableManager.clearAllCache();
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const validFolders = workspaceFolders
-      ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
-
-    const settings = await getDocumentSettings();
-
-    logger("onDidOpenTextDocument", {
-      settings,
-      workspaceFolders,
-      validFolders,
-    });
-    // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...globalSettings,
-      ...settings,
-    });
-  });
   connection.onDidCloseTextDocument((event) => {
     connection.console.info("onDidCloseTextDocument");
     connection.console.info(event.textDocument.uri);
@@ -161,7 +140,25 @@ export const makeConnection = () => {
     return result;
   }
   documents.onDidOpen(async (_) => {
-    logger("onDidOpen", {});
+    documentSettings.clear();
+    cssVariableManager.clearAllCache();
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const validFolders = workspaceFolders
+      ?.map((folder) => uriToPath(folder.uri) || "")
+      .filter((path) => !!path);
+
+    const settings = await getDocumentSettings();
+
+    logger("onDidOpen", {
+      settings,
+      workspaceFolders,
+      validFolders,
+    });
+    // parse and sync variables
+    cssVariableManager.parseAndSyncVariables(validFolders || [], {
+      ...globalSettings,
+      ...settings,
+    });
   });
 
   // Only keep settings for open documents
