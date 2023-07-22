@@ -89,30 +89,11 @@ export const makeConnection = () => {
         undefined
       );
     }
-    // if (hasConfigurationCapability) {
-    //   connection.onDidChangeConfiguration(async (change) => {
-    //     // Reset all cached document settings
-    //     documentSettings.clear();
-    //     cssVariableManager.clearAllCache();
-
-    //     const validFolders = await connection.workspace
-    //       .getWorkspaceFolders()
-    //       .then((folders) =>
-    //         folders
-    //           ?.map((folder) => uriToPath(folder.uri) || "")
-    //           .filter((path) => !!path)
-    //       );
-
-    //     const settings = await getDocumentSettings();
-
-    //     // parse and sync variables
-    //     cssVariableManager.parseAndSyncVariables(validFolders || [], {
-    //       ...globalSettings,
-    //       ...settings,
-    //     });
-    //   });
-    //   return;
-    // }
+    if (hasWorkspaceFolderCapability) {
+      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
+        connection.console.log("Workspace folder change event received.");
+      });
+    }
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const validFolders = workspaceFolders
@@ -121,10 +102,9 @@ export const makeConnection = () => {
 
     const settings = await getDocumentSettings();
 
-    logger("onInitialized", { settings, workspaceFolders, validFolders });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...globalSettings,
+      ...defaultSettings,
       ...settings,
     });
   });
@@ -174,6 +154,32 @@ export const makeConnection = () => {
   documents.onDidClose((e) => {
     connection.console.log("Closed: " + e.document.uri);
     documentSettings.delete(e.document.uri);
+  });
+
+  connection.onDidChangeConfiguration(async (change) => {
+    logger("asdf", { change });
+    if (hasConfigurationCapability) {
+      // Reset all cached document settings
+      documentSettings.clear();
+      cssVariableManager.clearAllCache();
+
+      const validFolders = await connection.workspace
+        .getWorkspaceFolders()
+        .then((folders) =>
+          folders
+            ?.map((folder) => uriToPath(folder.uri) || "")
+            .filter((path) => !!path)
+        );
+
+      const settings = await getDocumentSettings();
+
+      // parse and sync variables
+      cssVariableManager.parseAndSyncVariables(validFolders || [], settings);
+    } else {
+      globalSettings = <CSSVariablesSettings>(
+        (change.settings?.cssVariables || defaultSettings)
+      );
+    }
   });
 
   connection.onDidChangeWatchedFiles(({ changes }) => {
