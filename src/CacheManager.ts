@@ -24,7 +24,6 @@ export default class CacheManager<T> {
   }
 
   public getAll() {
-    console.log(this.allVariables);
     return this.allVariables;
   }
 

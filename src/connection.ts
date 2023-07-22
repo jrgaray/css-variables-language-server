@@ -122,9 +122,22 @@ export const makeConnection = () => {
     connection.console.info(JSON.stringify(content));
   }
 
-  connection.onDidOpenTextDocument((event) => {
-    connection.console.info("onDidOpenTextDocument");
-    connection.console.info(event.textDocument.uri);
+  connection.onDidOpenTextDocument(async (event) => {
+    documentSettings.clear();
+    cssVariableManager.clearAllCache();
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const validFolders = workspaceFolders
+      ?.map((folder) => uriToPath(folder.uri) || "")
+      .filter((path) => !!path);
+
+    const settings = await getDocumentSettings();
+
+    logger("onInitialized", { settings, workspaceFolders, validFolders });
+    // parse and sync variables
+    cssVariableManager.parseAndSyncVariables(validFolders || [], {
+      ...globalSettings,
+      ...settings,
+    });
   });
   connection.onDidCloseTextDocument((event) => {
     connection.console.info("onDidCloseTextDocument");
@@ -143,9 +156,7 @@ export const makeConnection = () => {
     }
     return result;
   }
-  documents.onDidOpen((e) => {
-    connection.console.info(`onDocumentDidOpen ${e.document.uri}`);
-  });
+  documents.onDidOpen(async (_) => { });
 
   // Only keep settings for open documents
   documents.onDidClose((e) => {
@@ -190,7 +201,8 @@ export const makeConnection = () => {
       if (filePath) {
         // remove variables from cache
         if (change.type === FileChangeType.Deleted) {
-          cssVariableManager.clearFileCache(filePath);
+          cssVariableManager.clearAllCache();
+          // cssVariableManager.clearFileCache(filePath);
         } else {
           const content = fs.readFileSync(filePath, "utf8");
           cssVariableManager.parseCSSVariablesFromText({
@@ -300,22 +312,6 @@ export const makeConnection = () => {
     if (!doc) {
       return null;
     }
-    documentSettings.clear();
-    cssVariableManager.clearAllCache();
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const validFolders = workspaceFolders
-      ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
-
-    const settings = await getDocumentSettings();
-
-    logger("onInitialized", { settings, workspaceFolders, validFolders });
-    // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...globalSettings,
-      ...settings,
-    });
-
     const offset = doc.offsetAt(params.position);
     const currentWord = getCurrentWord(doc, offset);
 
