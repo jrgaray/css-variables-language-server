@@ -154,6 +154,7 @@ export const makeConnection = () => {
       settings,
       workspaceFolders,
       validFolders,
+      document,
     });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(validFolders || [], {
