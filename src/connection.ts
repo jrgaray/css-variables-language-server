@@ -141,12 +141,18 @@ export const makeConnection = () => {
   }
 
   documents.onDidOpen(async ({ document }) => {
+    if (!document.uri) return;
     documentSettings.clear();
     cssVariableManager.clearAllCache();
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const currentFile = document.uri.startsWith("file://")
+      ? document.uri.slice(7)
+      : document.uri;
+
     const validFolders = workspaceFolders
       ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
+      .filter((path) => !!path)
+      .filter((path) => currentFile.startsWith(path));
 
     const settings = await getDocumentSettings();
 
