@@ -127,21 +127,23 @@ export const makeConnection = () => {
     connection.console.info(event.textDocument.uri);
   });
 
-  function getDocumentSettings(): Thenable<CSSVariablesSettings> {
-    const resource = "all";
-    if (!hasConfigurationCapability) {
-      return Promise.resolve(globalSettings);
-    }
-    let result = documentSettings.get(resource);
-    if (!result) {
-      result = connection.workspace.getConfiguration("cssVariables");
-      documentSettings.set(resource, result);
-    }
-    logger("getDocumentSettings", result);
-    return result;
-  }
+  // function getDocumentSettings(): Thenable<CSSVariablesSettings> {
+  //   const resource = "all";
+  //   if (!hasConfigurationCapability) {
+  //     return Promise.resolve(globalSettings);
+  //   }
+  //   let result = documentSettings.get(resource);
+  //   if (!result) {
+  //     result = connection.workspace.getConfiguration("cssVariables");
+  //     documentSettings.set(resource, result);
+  //   }
+  //   logger("getDocumentSettings", result);
+  //   return result;
+  // }
 
   documents.onDidOpen(async ({ document }) => {
+    logger("odo", document);
+    logger("odo", globalSettings);
     if (!document.uri) return;
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
@@ -153,6 +155,8 @@ export const makeConnection = () => {
       ?.map((folder) => uriToPath(folder.uri) || "")
       .filter((path) => !!path)
       .filter((path) => currentFile.startsWith(path));
+
+    logger("globalSettings", globalSettings);
 
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(
@@ -174,6 +178,7 @@ export const makeConnection = () => {
     globalSettings = <CSSVariablesSettings>(
       (change.settings?.cssVariables || defaultSettings)
     );
+    logger("asdf", globalSettings);
   });
 
   connection.onDidChangeWatchedFiles(({ changes }) => {
