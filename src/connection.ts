@@ -137,13 +137,13 @@ export const makeConnection = () => {
       result = connection.workspace.getConfiguration("cssVariables");
       documentSettings.set(resource, result);
     }
+    logger("getDocumentSettings", result);
     return result;
   }
 
   documents.onDidOpen(async ({ document }) => {
     if (!document.uri) return;
-    documentSettings.clear();
-    cssVariableManager.clearAllCache();
+
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const currentFile = document.uri.startsWith("file://")
       ? document.uri.slice(7)
@@ -154,19 +154,11 @@ export const makeConnection = () => {
       .filter((path) => !!path)
       .filter((path) => currentFile.startsWith(path));
 
-    const settings = await getDocumentSettings();
-
-    logger("onDidOpen", {
-      settings,
-      workspaceFolders,
-      validFolders,
-      document,
-    });
     // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...globalSettings,
-      ...settings,
-    });
+    cssVariableManager.parseAndSyncVariables(
+      validFolders || [],
+      globalSettings
+    );
   });
 
   // Only keep settings for open documents
@@ -177,35 +169,14 @@ export const makeConnection = () => {
 
   connection.onDidChangeConfiguration(async (change) => {
     logger("asdf", { change });
-    if (hasConfigurationCapability) {
-      // Reset all cached document settings
-      documentSettings.clear();
-      cssVariableManager.clearAllCache();
-
-      const validFolders = await connection.workspace
-        .getWorkspaceFolders()
-        .then((folders) =>
-          folders
-            ?.map((folder) => uriToPath(folder.uri) || "")
-            .filter((path) => !!path)
-        );
-
-      const settings = await getDocumentSettings();
-
-      // parse and sync variables
-      cssVariableManager.parseAndSyncVariables(validFolders || [], {
-        ...globalSettings,
-        ...settings,
-      });
-    } else {
-      globalSettings = <CSSVariablesSettings>(
-        (change.settings?.cssVariables || defaultSettings)
-      );
-    }
+    documentSettings.clear();
+    cssVariableManager.clearAllCache();
+    globalSettings = <CSSVariablesSettings>(
+      (change.settings?.cssVariables || defaultSettings)
+    );
   });
 
   connection.onDidChangeWatchedFiles(({ changes }) => {
-    logger("onDidChangeWatchedFiles", { changes });
     // update cached variables
     changes.forEach((change) => {
       const filePath = uriToPath(change.uri);
