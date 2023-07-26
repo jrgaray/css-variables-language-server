@@ -95,18 +95,18 @@ export const makeConnection = () => {
       });
     }
 
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const validFolders = workspaceFolders
-      ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path);
+    // const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    // const validFolders = workspaceFolders
+    //   ?.map((folder) => uriToPath(folder.uri) || "")
+    //   .filter((path) => !!path);
 
-    const settings = await getDocumentSettings();
+    // const settings = await getDocumentSettings();
 
-    // parse and sync variables
-    cssVariableManager.parseAndSyncVariables(validFolders || [], {
-      ...defaultSettings,
-      ...settings,
-    });
+    // // parse and sync variables
+    // cssVariableManager.parseAndSyncVariables(validFolders || [], {
+    //   ...defaultSettings,
+    //   ...settings,
+    // });
   });
 
   let globalSettings = defaultSettings;
