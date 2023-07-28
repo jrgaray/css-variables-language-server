@@ -24,6 +24,8 @@ import CSSVariableManager, {
   CSSVariablesSettings,
   defaultSettings,
 } from "./CSSVariableManager";
+import { document } from "postcss";
+import { PluginManager } from "less";
 
 export const makeConnection = () => {
   // Create a connection for the server, using Node's IPC as a transport.
@@ -34,6 +36,9 @@ export const makeConnection = () => {
   const documents: TextDocuments<TextDocument> = new TextDocuments(
     TextDocument
   );
+  connection.onDidOpenTextDocument((doc) => {
+    logger("asdf", doc);
+  });
 
   let hasConfigurationCapability = false;
   let hasWorkspaceFolderCapability = false;
@@ -142,8 +147,8 @@ export const makeConnection = () => {
   // }
 
   documents.onDidOpen(async ({ document }) => {
-    logger("odo", document);
-    logger("odo", globalSettings);
+    logger("nepo", document);
+    logger("nepo", globalSettings);
     if (!document.uri) return;
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
@@ -153,10 +158,9 @@ export const makeConnection = () => {
 
     const validFolders = workspaceFolders
       ?.map((folder) => uriToPath(folder.uri) || "")
-      .filter((path) => !!path)
-      .filter((path) => currentFile.startsWith(path));
+      .filter((path) => !!path && currentFile.startsWith(path));
 
-    logger("globalSettings", globalSettings);
+    logger("nepo", globalSettings);
 
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(
@@ -172,13 +176,13 @@ export const makeConnection = () => {
   });
 
   connection.onDidChangeConfiguration(async (change) => {
-    logger("asdf", { change });
+    logger("configChange", { change });
     documentSettings.clear();
     cssVariableManager.clearAllCache();
     globalSettings = <CSSVariablesSettings>(
       (change.settings?.cssVariables || defaultSettings)
     );
-    logger("asdf", globalSettings);
+    logger("configChange", globalSettings);
   });
 
   connection.onDidChangeWatchedFiles(({ changes }) => {
@@ -216,9 +220,7 @@ export const makeConnection = () => {
 
       const items: CompletionItem[] = [];
       const variableOptions = cssVariableManager.getAll();
-      logger("onCompletion", { variableOptions, currentWord });
       variableOptions.forEach((variable) => {
-        logger("onCompletion", variable);
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall
           ? varSymbol.name
@@ -352,8 +354,6 @@ export const makeConnection = () => {
       },
       {}
     );
-
-    connection.console.log(JSON.stringify(allObject));
 
     if (cssVariable) {
       return cssVariable.definition;
