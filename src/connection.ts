@@ -95,8 +95,8 @@ export const makeConnection = () => {
       );
     }
     if (hasWorkspaceFolderCapability) {
-      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-        connection.console.info("Workspace folder change event received.");
+      connection.workspace.onDidChangeWorkspaceFolders((e) => {
+        logger("workspace change", e);
       });
     }
 
