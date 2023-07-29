@@ -24,8 +24,6 @@ import CSSVariableManager, {
   CSSVariablesSettings,
   defaultSettings,
 } from "./CSSVariableManager";
-import { document } from "postcss";
-import { PluginManager } from "less";
 
 export const makeConnection = () => {
   // Create a connection for the server, using Node's IPC as a transport.
@@ -147,8 +145,6 @@ export const makeConnection = () => {
   // }
 
   documents.onDidOpen(async ({ document }) => {
-    logger("nepo", document);
-    logger("nepo", globalSettings);
     if (!document.uri) return;
 
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
@@ -160,8 +156,7 @@ export const makeConnection = () => {
       ?.map((folder) => uriToPath(folder.uri) || "")
       .filter((path) => !!path && currentFile.startsWith(path));
 
-    logger("nepo", globalSettings);
-
+    logger("file opened", { document, globalSettings, validFolders });
     // parse and sync variables
     cssVariableManager.parseAndSyncVariables(
       validFolders || [],
