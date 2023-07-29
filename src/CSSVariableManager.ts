@@ -76,6 +76,7 @@ export default class CSSVariableManager {
     try {
       // reset cache for this file
       this.clearFileCache(filePath);
+      this.clearAllCache();
 
       const ast = getAST(filePath, content);
       const fileURI = pathToFileURL(filePath).toString();
@@ -179,6 +180,9 @@ export default class CSSVariableManager {
 
   public getAll() {
     return this.cacheManager.getAll();
+  }
+  public getAllForPath(path: string) {
+    return this.cacheManager.getAllForWorkspace(path);
   }
 
   public clearFileCache(filePath: string) {

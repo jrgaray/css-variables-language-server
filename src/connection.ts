@@ -34,9 +34,6 @@ export const makeConnection = () => {
   const documents: TextDocuments<TextDocument> = new TextDocuments(
     TextDocument
   );
-  connection.onDidOpenTextDocument((doc) => {
-    logger("asdf", doc);
-  });
 
   let hasConfigurationCapability = false;
   let hasWorkspaceFolderCapability = false;
@@ -97,19 +94,6 @@ export const makeConnection = () => {
         logger("workspace change", e);
       });
     }
-
-    // const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    // const validFolders = workspaceFolders
-    //   ?.map((folder) => uriToPath(folder.uri) || "")
-    //   .filter((path) => !!path);
-
-    // const settings = await getDocumentSettings();
-
-    // // parse and sync variables
-    // cssVariableManager.parseAndSyncVariables(validFolders || [], {
-    //   ...defaultSettings,
-    //   ...settings,
-    // });
   });
 
   let globalSettings = defaultSettings;
@@ -129,20 +113,6 @@ export const makeConnection = () => {
     connection.console.info("onDidCloseTextDocument");
     connection.console.info(event.textDocument.uri);
   });
-
-  // function getDocumentSettings(): Thenable<CSSVariablesSettings> {
-  //   const resource = "all";
-  //   if (!hasConfigurationCapability) {
-  //     return Promise.resolve(globalSettings);
-  //   }
-  //   let result = documentSettings.get(resource);
-  //   if (!result) {
-  //     result = connection.workspace.getConfiguration("cssVariables");
-  //     documentSettings.set(resource, result);
-  //   }
-  //   logger("getDocumentSettings", result);
-  //   return result;
-  // }
 
   documents.onDidOpen(async ({ document }) => {
     if (!document.uri) return;
@@ -214,7 +184,9 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      const variableOptions = cssVariableManager.getAll();
+      const variableOptions = cssVariableManager.getAllForPath(
+        doc.uri.startsWith("file://") ? doc.uri.replace("file://", "") : doc.uri
+      );
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall
