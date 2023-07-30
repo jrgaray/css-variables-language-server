@@ -142,8 +142,6 @@ export const makeConnection = () => {
 
   connection.onDidChangeConfiguration(async (change) => {
     logger("configChange", { change });
-    documentSettings.clear();
-    cssVariableManager.clearAllCache();
     globalSettings = <CSSVariablesSettings>(
       (change.settings?.cssVariables || defaultSettings)
     );
@@ -314,19 +312,8 @@ export const makeConnection = () => {
 
     const nornalizedWord = currentWord.slice(1);
     const cssVariable = cssVariableManager.getAll().get(nornalizedWord);
-    const allObject = [...cssVariableManager.getAll().entries()].reduce(
-      (acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-      },
-      {}
-    );
 
-    if (cssVariable) {
-      return cssVariable.definition;
-    }
-
-    return null;
+    return cssVariable ? cssVariable.definition : null;
   });
 
   // Make the text document manager listen on the connection
