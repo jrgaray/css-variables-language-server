@@ -44,15 +44,15 @@ export default class CacheManager<T> {
   }
 
   public set(filePath: string, key: string, value: T, workspace: string) {
-    if (!this.cachedVariables[workspace]) {
-      this.cachedVariables[workspace] = new Map();
+    if (!this.cachedVariables.get(workspace)) {
+      this.cachedVariables.set(workspace, new Map());
     }
-    if (!this.cachedVariables[workspace][filePath]) {
-      this.cachedVariables[workspace][filePath] = new Map();
+    if (!this.cachedVariables.get(workspace).get(filePath)) {
+      this.cachedVariables.get(workspace).set(filePath, new Map());
     }
 
     this.allVariables?.set(key, value);
-    this.cachedVariables[workspace][filePath].set(key, value);
+    this.cachedVariables.get(workspace).get(filePath).set(key, value);
   }
 
   public clearFileCache(filePath: string, workspace: string) {

@@ -195,8 +195,12 @@ export const makeConnection = () => {
 
       const variableOptions = cssVariableManager.getAllForPath(workspace);
       const cache = cssVariableManager.getCache();
+      const all = cssVariableManager.getAll();
+      const test = new Map();
 
-      logger("complete", { variableOptions, workspace, cache });
+      test.set("test", new Map());
+      test.get("test").set("foo", "bar");
+      logger("complete", { variableOptions, workspace, cache, all, test });
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
