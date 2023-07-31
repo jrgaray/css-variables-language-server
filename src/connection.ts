@@ -175,7 +175,7 @@ export const makeConnection = () => {
 
   // This handler provides the initial list of the completion items.
   connection.onCompletion(
-    (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    async (_textDocumentPosition: TextDocumentPositionParams) => {
       const doc = documents.get(_textDocumentPosition.textDocument.uri);
       if (!doc) {
         return [];
@@ -187,11 +187,16 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      const path = doc.uri.startsWith("file://") ? doc.uri.slice(7) : doc.uri;
-      const variableOptions = cssVariableManager.getAllForPath(path);
+      const filePath = uriToPath(doc.uri);
+      const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+      const [workspace] = workspaceFolders
+        .map((folder) => uriToPath(folder.uri) ?? "")
+        .find((ws) => filePath.includes(ws)) ?? [""];
+
+      const variableOptions = cssVariableManager.getAllForPath(workspace);
       const cache = cssVariableManager.getCache();
 
-      logger("complete", { variableOptions, path, cache });
+      logger("complete", { variableOptions, workspace, cache });
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
