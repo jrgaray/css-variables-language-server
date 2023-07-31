@@ -203,6 +203,8 @@ export const makeConnection = () => {
         variableOptions,
         workspace,
         workspaces: wsFolderUris,
+        filePath,
+        textDoc: _textDocumentPosition.textDocument,
       });
 
       variableOptions.forEach((variable) => {
