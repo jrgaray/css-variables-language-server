@@ -148,25 +148,30 @@ export const makeConnection = () => {
     logger("configChange", globalSettings);
   });
 
-  // connection.onDidChangeWatchedFiles(async ({ changes }) => {
-  //   const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-  //   // update cached variables
-  //   changes.forEach((change) => {
-  //     const filePath = uriToPath(change.uri);
-  //     if (filePath) {
-  //       // remove variables from cache
-  //       if (change.type === FileChangeType.Deleted) {
-  //         cssVariableManager.clearFileCache(filePath);
-  //       } else {
-  //         const content = fs.readFileSync(filePath, "utf8");
-  //         cssVariableManager.parseCSSVariablesFromText({
-  //           content,
-  //           filePath,
-  //         });
-  //       }
-  //     }
-  //   });
-  // });
+  connection.onDidChangeWatchedFiles(async ({ changes }) => {
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    // update cached variables
+    changes.forEach((change) => {
+      const filePath = uriToPath(change.uri);
+      if (filePath) {
+        const [workspace] = workspaceFolders
+          ?.map((folder) => uriToPath(folder.uri) || "")
+          .find((ws) => filePath.includes(ws)) ?? [""];
+
+        // remove variables from cache
+        if (change.type === FileChangeType.Deleted) {
+          cssVariableManager.clearFileCache(filePath, workspace);
+        } else {
+          const content = fs.readFileSync(filePath, "utf8");
+          cssVariableManager.parseCSSVariablesFromText({
+            content,
+            filePath,
+            workspace,
+          });
+        }
+      }
+    });
+  });
 
   // This handler provides the initial list of the completion items.
   connection.onCompletion(
@@ -184,10 +189,9 @@ export const makeConnection = () => {
       const items: CompletionItem[] = [];
       const path = doc.uri.startsWith("file://") ? doc.uri.slice(7) : doc.uri;
       const variableOptions = cssVariableManager.getAllForPath(path);
-      const workspaces = cssVariableManager.getWorkspaces();
       const cache = cssVariableManager.getCache();
 
-      logger("complete", { variableOptions, path, workspaces, cache });
+      logger("complete", { variableOptions, path, cache });
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;

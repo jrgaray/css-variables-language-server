@@ -69,19 +69,15 @@ export default class CSSVariableManager {
   public parseCSSVariablesFromText = async ({
     content,
     filePath,
-    isImport = false,
     workspace,
   }: {
     content: string;
     filePath: string;
     workspace: string;
-    isImport?: boolean;
   }) => {
     try {
-      if (!isImport) {
-        // reset cache for this file
-        this.clearFileCache(filePath);
-      }
+      // reset cache for this file
+      this.clearFileCache(filePath, workspace);
 
       const ast = getAST(filePath, content);
       const fileURI = pathToFileURL(filePath).toString();
@@ -115,7 +111,6 @@ export default class CSSVariableManager {
               content: cssText,
               filePath: url,
               workspace,
-              isImport: true,
             });
           } catch (err) {
             console.log(err, `cannot fetch data from ${url}`);
@@ -155,7 +150,7 @@ export default class CSSVariableManager {
           // add to cache
           // in the case of imports, save to cache under the path of
           // the workspace.
-          this.cacheManager.set(workspace, decl.prop, variable);
+          this.cacheManager.set(filePath, decl.prop, variable, workspace);
         }
       });
     } catch (error) {
@@ -194,16 +189,13 @@ export default class CSSVariableManager {
   public getAllForPath(path: string) {
     return this.cacheManager.getAllForWorkspace(path);
   }
-  public getWorkspaces() {
-    return this.cacheManager.workspaces();
-  }
 
   public getCache() {
     return this.cacheManager.getCachedVars();
   }
 
-  public clearFileCache(filePath: string) {
-    this.cacheManager.clearFileCache(filePath);
+  public clearFileCache(filePath: string, workspace: string) {
+    this.cacheManager.clearFileCache(filePath, workspace);
   }
 
   public clearAllCache() {
