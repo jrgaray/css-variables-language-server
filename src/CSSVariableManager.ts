@@ -195,6 +195,9 @@ export default class CSSVariableManager {
   public getAllForPath(path: string) {
     return this.cacheManager.getAllForWorkspace(path);
   }
+  public getWorkspaces() {
+    return this.cacheManager.workspaces();
+  }
 
   public getCache() {
     return this.cacheManager.getCachedVars();

@@ -40,6 +40,11 @@ export default class CacheManager<T> {
     if (!path) return new Map();
     return this.cachedVariables[path];
   }
+  public workspaces() {
+    const workspaces = [];
+    this.cachedVariables.forEach((_, key) => workspaces.push(key));
+    return workspaces;
+  }
 
   public set(filePath: string, key: string, value: T) {
     if (!this.cachedVariables[filePath]) {
