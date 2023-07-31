@@ -194,9 +194,8 @@ export const makeConnection = () => {
         (folder) => uriToPath(folder.uri) ?? ""
       );
 
-      const [workspace] = wsFolderUris.find((ws) =>
-        filePath.startsWith(ws)
-      ) ?? [""];
+      const workspace =
+        wsFolderUris.find((ws) => filePath.startsWith(ws)) ?? "";
 
       const variableOptions = cssVariableManager.getAllForPath(workspace);
       logger("complete", {
