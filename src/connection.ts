@@ -189,9 +189,14 @@ export const makeConnection = () => {
       const items: CompletionItem[] = [];
       const filePath = uriToPath(doc.uri);
       const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-      const [workspace] = workspaceFolders
-        .map((folder) => uriToPath(folder.uri) ?? "")
-        .find((ws) => filePath.includes(ws)) ?? [""];
+
+      const wsFolderUris = workspaceFolders.map(
+        (folder) => uriToPath(folder.uri) ?? ""
+      );
+
+      const [workspace] = wsFolderUris.find((ws) => filePath.includes(ws)) ?? [
+        "",
+      ];
 
       const variableOptions = cssVariableManager.getAllForPath(workspace);
       const cache = cssVariableManager.getCache();
@@ -200,7 +205,14 @@ export const makeConnection = () => {
 
       test.set("test", new Map());
       test.get("test").set("foo", "bar");
-      logger("complete", { variableOptions, workspace, cache, all, test });
+      logger("complete", {
+        variableOptions,
+        workspace,
+        workspaces: wsFolderUris,
+        cache,
+        all,
+        test,
+      });
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
