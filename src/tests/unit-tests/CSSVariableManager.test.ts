@@ -9,7 +9,9 @@ async function runTest(
 
   await cssManager.parseAndSyncVariables([path.join(__dirname, fixturePath)]);
 
+  const workspace = path.join(__dirname, fixturePath);
   const allVars = cssManager.getAll();
+  const vars = cssManager.getAllForPath(workspace);
 
   expect(allVars.get("--main-bg-color").symbol.value).toEqual("brown");
   expect(allVars.get("--h1").symbol.value).toEqual("26px");

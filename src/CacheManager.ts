@@ -36,8 +36,8 @@ export default class CacheManager<T> {
     if (!workspace) return new Map();
     const variables = new Map();
     workspace.forEach((file) =>
-      file.forEach((cssVar, css) => {
-        variables.set(cssVar, css);
+      file.forEach((value, key) => {
+        variables.set(key, value);
       })
     );
     return variables;
@@ -63,8 +63,8 @@ export default class CacheManager<T> {
   }
   public clearWorkspaceCache(workspace: string) {
     this.cachedVariables.get(workspace).forEach((file) =>
-      file.forEach((_, cssVar) => {
-        this.allVariables?.delete(cssVar);
+      file.forEach((_, key) => {
+        this.allVariables?.delete(key);
       })
     );
     this.cachedVariables.get(workspace).clear();

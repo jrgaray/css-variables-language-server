@@ -198,13 +198,8 @@ export const makeConnection = () => {
         wsFolderUris.find((ws) => filePath.startsWith(ws)) ?? "";
 
       const variableOptions = cssVariableManager.getAllForPath(workspace);
-      logger("complete", {
-        variableOptions,
-        workspace,
-        workspaces: wsFolderUris,
-        filePath,
-        textDoc: _textDocumentPosition.textDocument,
-      });
+
+      variableOptions.forEach((opt, val) => logger(val, opt));
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
