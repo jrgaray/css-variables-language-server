@@ -182,9 +182,12 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      const variableOptions = cssVariableManager.getAllForPath(
-        doc.uri.startsWith("file://") ? doc.uri.replace("file://", "") : doc.uri
-      );
+      const path = doc.uri.startsWith("file://") ? doc.uri.slice(7) : doc.uri;
+      const variableOptions = cssVariableManager.getAllForPath(path);
+      const workspaces = cssVariableManager.getWorkspaces();
+
+      logger("complete", { variableOptions, path, workspaces });
+
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
         const insertText = isFunctionCall

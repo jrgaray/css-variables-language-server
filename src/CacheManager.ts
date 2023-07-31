@@ -26,9 +26,13 @@ export default class CacheManager<T> {
   public getAll() {
     return this.allVariables;
   }
+  public getWorkspaces() {
+    return this.cachedVariables.keys();
+  }
 
   public getAllForWorkspace(filePath: string) {
     const workspaces = this.cachedVariables.keys();
+    console.log({ workspaces });
     const [path] = [...workspaces].find((workspace) =>
       filePath.startsWith(workspace)
     ) ?? [""];
