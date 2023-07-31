@@ -26,17 +26,18 @@ export default class CacheManager<T> {
   public getAll() {
     return this.allVariables;
   }
-  public getWorkspaces() {
-    return this.cachedVariables.keys();
+
+  public getCachedVars() {
+    return this.cachedVariables;
   }
 
   public getAllForWorkspace(filePath: string) {
-    const workspaces = this.cachedVariables.keys();
-    console.log({ workspaces });
-    const [path] = [...workspaces].find((workspace) =>
-      filePath.startsWith(workspace)
-    ) ?? [""];
-    if (!this.cachedVariables[path]) return [];
+    const workspaces = [];
+    this.cachedVariables.forEach((_, key) => workspaces.push(key));
+
+    const [path] =
+      workspaces.find((workspace) => filePath.startsWith(workspace)) ?? [];
+    if (!path) return new Map();
     return this.cachedVariables[path];
   }
 

@@ -160,6 +160,7 @@ export default class CSSVariableManager {
         }
       });
     } catch (error) {
+      console.log(error);
       console.error(filePath);
     }
   };
@@ -194,8 +195,9 @@ export default class CSSVariableManager {
   public getAllForPath(path: string) {
     return this.cacheManager.getAllForWorkspace(path);
   }
-  public getWorkspaces() {
-    return this.cacheManager.getWorkspaces();
+
+  public getCache() {
+    return this.cacheManager.getCachedVars();
   }
 
   public clearFileCache(filePath: string) {
