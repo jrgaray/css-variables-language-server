@@ -187,31 +187,22 @@ export const makeConnection = () => {
       const isFunctionCall = isInFunctionExpression(currentWord);
 
       const items: CompletionItem[] = [];
-      const filePath = uriToPath(doc.uri);
+      const filePath = uriToPath(_textDocumentPosition.textDocument.uri);
       const workspaceFolders = await connection.workspace.getWorkspaceFolders();
 
       const wsFolderUris = workspaceFolders.map(
         (folder) => uriToPath(folder.uri) ?? ""
       );
 
-      const [workspace] = wsFolderUris.find((ws) => filePath.includes(ws)) ?? [
-        "",
-      ];
+      const [workspace] = wsFolderUris.find((ws) =>
+        filePath.startsWith(ws)
+      ) ?? [""];
 
       const variableOptions = cssVariableManager.getAllForPath(workspace);
-      const cache = cssVariableManager.getCache();
-      const all = cssVariableManager.getAll();
-      const test = new Map();
-
-      test.set("test", new Map());
-      test.get("test").set("foo", "bar");
       logger("complete", {
         variableOptions,
         workspace,
         workspaces: wsFolderUris,
-        cache,
-        all,
-        test,
       });
 
       variableOptions.forEach((variable) => {
