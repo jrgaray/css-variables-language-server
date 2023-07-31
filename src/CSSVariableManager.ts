@@ -69,14 +69,17 @@ export default class CSSVariableManager {
   public parseCSSVariablesFromText = async ({
     content,
     filePath,
+    parentFilePath,
   }: {
     content: string;
     filePath: string;
+    parentFilePath?: string;
   }) => {
     try {
-      // reset cache for this file
-      this.clearFileCache(filePath);
-      this.clearAllCache();
+      if (!parentFilePath) {
+        // reset cache for this file
+        this.clearFileCache(filePath);
+      }
 
       const ast = getAST(filePath, content);
       const fileURI = pathToFileURL(filePath).toString();
@@ -109,6 +112,7 @@ export default class CSSVariableManager {
             return this.parseCSSVariablesFromText({
               content: cssText,
               filePath: url,
+              parentFilePath: filePath,
             });
           } catch (err) {
             console.log(err, `cannot fetch data from ${url}`);
@@ -146,7 +150,13 @@ export default class CSSVariableManager {
           }
 
           // add to cache
-          this.cacheManager.set(filePath, decl.prop, variable);
+          // in the case of imports, save to cache under the path of
+          // the workspace.
+          this.cacheManager.set(
+            parentFilePath ?? filePath,
+            decl.prop,
+            variable
+          );
         }
       });
     } catch (error) {
