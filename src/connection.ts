@@ -185,8 +185,9 @@ export const makeConnection = () => {
       const path = doc.uri.startsWith("file://") ? doc.uri.slice(7) : doc.uri;
       const variableOptions = cssVariableManager.getAllForPath(path);
       const workspaces = cssVariableManager.getWorkspaces();
+      const cache = cssVariableManager.getCache();
 
-      logger("complete", { variableOptions, path, workspaces });
+      logger("complete", { variableOptions, path, workspaces, cache });
 
       variableOptions.forEach((variable) => {
         const varSymbol = variable.symbol;
