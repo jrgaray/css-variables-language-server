@@ -148,25 +148,25 @@ export const makeConnection = () => {
     logger("configChange", globalSettings);
   });
 
-  connection.onDidChangeWatchedFiles(({ changes }) => {
-    // update cached variables
-    changes.forEach((change) => {
-      const filePath = uriToPath(change.uri);
-      if (filePath) {
-        // remove variables from cache
-        if (change.type === FileChangeType.Deleted) {
-          cssVariableManager.clearAllCache();
-          // cssVariableManager.clearFileCache(filePath);
-        } else {
-          const content = fs.readFileSync(filePath, "utf8");
-          cssVariableManager.parseCSSVariablesFromText({
-            content,
-            filePath,
-          });
-        }
-      }
-    });
-  });
+  // connection.onDidChangeWatchedFiles(async ({ changes }) => {
+  //   const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+  //   // update cached variables
+  //   changes.forEach((change) => {
+  //     const filePath = uriToPath(change.uri);
+  //     if (filePath) {
+  //       // remove variables from cache
+  //       if (change.type === FileChangeType.Deleted) {
+  //         cssVariableManager.clearFileCache(filePath);
+  //       } else {
+  //         const content = fs.readFileSync(filePath, "utf8");
+  //         cssVariableManager.parseCSSVariablesFromText({
+  //           content,
+  //           filePath,
+  //         });
+  //       }
+  //     }
+  //   });
+  // });
 
   // This handler provides the initial list of the completion items.
   connection.onCompletion(
