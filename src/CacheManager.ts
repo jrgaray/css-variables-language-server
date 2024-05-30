@@ -12,12 +12,13 @@
  */
 
 export default class CacheManager<T> {
-  private cachedVariables: Map<string, Map<string, Map<string, T>>> = new Map();
+  private cachedVariablesByWorkspace: Map<string, Map<string, Map<string, T>>> =
+    new Map();
   private allVariables: Map<string, T> = new Map();
 
   public get(key: string, filePath?: string) {
     if (filePath) {
-      return this.cachedVariables[filePath]?.get(key);
+      return this.cachedVariablesByWorkspace[filePath]?.get(key);
     }
 
     return this.allVariables?.get(key);
@@ -28,11 +29,11 @@ export default class CacheManager<T> {
   }
 
   public getCachedVars() {
-    return this.cachedVariables;
+    return this.cachedVariablesByWorkspace;
   }
 
   public getAllForWorkspace(currentWorkspace: string) {
-    const workspace = this.cachedVariables.get(currentWorkspace);
+    const workspace = this.cachedVariablesByWorkspace.get(currentWorkspace);
     if (!workspace) return new Map();
     const variables = new Map();
     workspace.forEach((file) =>
@@ -44,34 +45,39 @@ export default class CacheManager<T> {
   }
 
   public set(filePath: string, key: string, value: T, workspace: string) {
-    if (!this.cachedVariables.get(workspace)) {
-      this.cachedVariables.set(workspace, new Map());
+    if (!this.cachedVariablesByWorkspace.get(workspace)) {
+      this.cachedVariablesByWorkspace.set(workspace, new Map());
     }
-    if (!this.cachedVariables.get(workspace).get(filePath)) {
-      this.cachedVariables.get(workspace).set(filePath, new Map());
+    if (!this.cachedVariablesByWorkspace.get(workspace).get(filePath)) {
+      this.cachedVariablesByWorkspace.get(workspace).set(filePath, new Map());
     }
 
     this.allVariables?.set(key, value);
-    this.cachedVariables.get(workspace).get(filePath).set(key, value);
+    this.cachedVariablesByWorkspace
+      .get(workspace)
+      .get(filePath)
+      .set(key, value);
   }
 
   public clearFileCache(filePath: string, workspace: string) {
-    this.cachedVariables?.[workspace]?.[filePath]?.forEach((_, key) => {
-      this.allVariables?.delete(key);
-    });
-    this.cachedVariables?.[filePath]?.clear();
+    this.cachedVariablesByWorkspace?.[workspace]?.[filePath]?.forEach(
+      (_, key) => {
+        this.allVariables?.delete(key);
+      }
+    );
+    this.cachedVariablesByWorkspace?.[filePath]?.clear();
   }
   public clearWorkspaceCache(workspace: string) {
-    this.cachedVariables.get(workspace).forEach((file) =>
+    this.cachedVariablesByWorkspace.get(workspace).forEach((file) =>
       file.forEach((_, key) => {
         this.allVariables?.delete(key);
       })
     );
-    this.cachedVariables.get(workspace).clear();
+    this.cachedVariablesByWorkspace.get(workspace).clear();
   }
 
   public clearAllCache() {
     this.allVariables?.clear();
-    this.cachedVariables.clear();
+    this.cachedVariablesByWorkspace.clear();
   }
 }

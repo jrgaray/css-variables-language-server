@@ -9,25 +9,23 @@ async function runTest(
 
   await cssManager.parseAndSyncVariables([path.join(__dirname, fixturePath)]);
 
-  const workspace = path.join(__dirname, fixturePath);
   const allVars = cssManager.getAll();
-  const vars = cssManager.getAllForPath(workspace);
 
-  expect(allVars.get("--main-bg-color").symbol.value).toEqual("brown");
-  expect(allVars.get("--h1").symbol.value).toEqual("26px");
-  expect(allVars.get("--h2").symbol.value).toEqual("22px");
-  expect(allVars.get("--h3").symbol.value).toEqual("18px");
-  expect(allVars.get("--text-base").symbol.value).toEqual("16px");
-  expect(allVars.get("--carousel-bg").symbol.value).toEqual(
+  expect(allVars.get("--main-bg-color")?.symbol.value).toEqual("brown");
+  expect(allVars.get("--h1")?.symbol.value).toEqual("26px");
+  expect(allVars.get("--h2")?.symbol.value).toEqual("22px");
+  expect(allVars.get("--h3")?.symbol.value).toEqual("18px");
+  expect(allVars.get("--text-base")?.symbol.value).toEqual("16px");
+  expect(allVars.get("--carousel-bg")?.symbol.value).toEqual(
     "var(--main-bg-color)"
   );
 
-  expect(allVars.get("--child-main-bg-color").symbol.value).toEqual("brown");
-  expect(allVars.get("--child-h1").symbol.value).toEqual("26px");
-  expect(allVars.get("--child-h2").symbol.value).toEqual("22px");
-  expect(allVars.get("--child-h3").symbol.value).toEqual("18px");
+  expect(allVars.get("--child-main-bg-color")?.symbol.value).toEqual("brown");
+  expect(allVars.get("--child-h1")?.symbol.value).toEqual("26px");
+  expect(allVars.get("--child-h2")?.symbol.value).toEqual("22px");
+  expect(allVars.get("--child-h3")?.symbol.value).toEqual("18px");
   // expect(allVars.get('--child-text-base').symbol.value).toEqual('16px');
-  expect(allVars.get("--child-carousel-bg").symbol.value).toEqual(
+  expect(allVars.get("--child-carousel-bg")?.symbol.value).toEqual(
     "var(--main-bg-color)"
   );
 
@@ -59,7 +57,8 @@ describe("CSS Variable Manager", () => {
 
   test("can parse variables from remote url", async () => {
     await runTest("../fixtures/import-url", (allVars) => {
-      expect(allVars.get("--slate-50").symbol.value).toEqual("#f8fafc");
+      console.log(allVars);
+      expect(allVars.get("--slate-50")?.symbol.value).toEqual("#f8fafc");
     });
   });
 });
